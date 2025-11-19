@@ -1,0 +1,45 @@
+
+
+#include <mpi.h>
+#include <stdio.h>
+int main(int argc, char** argv) {
+MPI_Init(&argc, &argv); // Initialize MPI
+int rank, size;
+MPI_Comm_rank(MPI_COMM_WORLD, &rank); // Process ID
+MPI_Comm_size(MPI_COMM_WORLD, &size); // Total number of processes
+int send_data[100]; // Large enough for demo
+int recv_value;
+int result[100]; // To gather results
+if (rank == 0) {
+// Root initializes an array with values
+for (int i = 0; i < size; i++) {
+send_data[i] = (i + 1) * 10;
+}
+printf("Root is scattering: ");
+for (int i = 0; i < size; i++) {
+printf("%d ", send_data[i]);
+}
+printf("\n");
+}
+// Scatter one element to each process
+MPI_Scatter(send_data, 1, MPI_INT, &recv_value, 1, MPI_INT, 0,
+MPI_COMM_WORLD);
+// Each process multiplies its number by 2
+recv_value *= 2;
+// Gather results at root
+MPI_Gather(&recv_value, 1, MPI_INT, result, 1, MPI_INT, 0, MPI_COMM_WORLD);
+if (rank == 0) {
+printf("Root gathered: ");
+for (int i = 0; i < size; i++) {
+printf("%d ", result[i]);
+}
+printf("\n");
+}
+MPI_Finalize();
+return 0;
+}
+
+
+Output:
+Root is scattering: 10 20
+Root gathered: 20 40

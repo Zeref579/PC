@@ -1,0 +1,28 @@
+
+
+#include <mpi.h>
+#include <stdio.h>
+int main(int argc, char** argv) {
+MPI_Init(&argc, &argv); // Initialize the MPI environment
+int rank, size;
+int data;
+MPI_Comm_rank(MPI_COMM_WORLD, &rank); // Get current process ID
+MPI_Comm_size(MPI_COMM_WORLD, &size); // Get total number of processes
+if (rank == 0) {
+data = 2025; // Root process initializes the data
+printf("Process 0 is broadcasting data: %d\n", data);
+}
+// Broadcast the value of `data` from process 0 to all other processes
+MPI_Bcast(&data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+// Now all processes have the same value
+printf("Process %d received data: %d\n", rank, data);
+MPI_Finalize(); // Finalize the MPI environment
+return 0;
+}
+
+
+mpicc broadcast_demo.c -o broadcast_demo
+mpirun ./broadcast_demo
+Process 0 is broadcasting data: 2025
+Process 0 received data: 2025
+Process 1 received data: 2025
